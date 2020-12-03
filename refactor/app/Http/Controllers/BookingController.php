@@ -35,15 +35,11 @@ class BookingController extends Controller
      */
     public function index(Request $request)
     {
-        if($user_id = $request->get('user_id')) {
-
-            $response = $this->repository->getUsersJobs($user_id);
-
-        }
-        elseif($request->__authenticatedUser->user_type == env('ADMIN_ROLE_ID') || $request->__authenticatedUser->user_type == env('SUPERADMIN_ROLE_ID'))
-        {
+        if ($request->__authenticatedUser->user_type == env('ADMIN_ROLE_ID') || $request->__authenticatedUser->user_type == env('SUPERADMIN_ROLE_ID')) {
             $response = $this->repository->getAll($request);
+            return response($response);
         }
+        $response = $this->repository->getUsersJobs($request->__authenticatedUser->id);
 
         return response($response);
     }
@@ -70,7 +66,6 @@ class BookingController extends Controller
         $response = $this->repository->store($request->__authenticatedUser, $data);
 
         return response($response);
-
     }
 
     /**
@@ -93,7 +88,6 @@ class BookingController extends Controller
      */
     public function immediateJobEmail(Request $request)
     {
-        $adminSenderEmail = config('app.adminemail');
         $data = $request->all();
 
         $response = $this->repository->storeJobEmail($data);
@@ -107,7 +101,7 @@ class BookingController extends Controller
      */
     public function getHistory(Request $request)
     {
-        if($user_id = $request->get('user_id')) {
+        if ($user_id = $request->get('user_id')) {
 
             $response = $this->repository->getUsersJobsHistory($user_id, $request);
             return response($response);
@@ -165,7 +159,6 @@ class BookingController extends Controller
         $response = $this->repository->endJob($data);
 
         return response($response);
-
     }
 
     public function customerNotCall(Request $request)
@@ -175,7 +168,6 @@ class BookingController extends Controller
         $response = $this->repository->customerNotCall($data);
 
         return response($response);
-
     }
 
     /**
@@ -217,12 +209,12 @@ class BookingController extends Controller
         }
 
         if ($data['flagged'] == 'true') {
-            if($data['admincomment'] == '') return "Please, add comment";
+            if ($data['admincomment'] == '') return "Please, add comment";
             $flagged = 'yes';
         } else {
             $flagged = 'no';
         }
-        
+
         if ($data['manually_handled'] == 'true') {
             $manually_handled = 'yes';
         } else {
@@ -248,7 +240,6 @@ class BookingController extends Controller
         if ($admincomment || $session || $flagged || $manually_handled || $by_admin) {
 
             $affectedRows1 = Job::where('id', '=', $jobid)->update(array('admin_comments' => $admincomment, 'flagged' => $flagged, 'session_time' => $session, 'manually_handled' => $manually_handled, 'by_admin' => $by_admin));
-
         }
 
         return response('Record updated!');
@@ -290,5 +281,4 @@ class BookingController extends Controller
             return response(['success' => $e->getMessage()]);
         }
     }
-
 }

@@ -127,12 +127,9 @@ class BaseRepository
      * @param array $customAttributes
      * @return \Illuminate\Validation\Validator
      */
-    public function validator(array $data = [], $rules = null, array $messages = [], array $customAttributes = [])
+    public function validator(array $data = [], ?array $rules = null, array $messages = [], array $customAttributes = [])
     {
-        if (is_null($rules)) {
-            $rules = $this->validationRules;
-        }
-
+        $rules = is_null($rules) ? $this->validationRules : $rules;
         return Validator::make($data, $rules, $messages, $customAttributes);
     }
 
@@ -144,7 +141,7 @@ class BaseRepository
      * @return bool
      * @throws ValidationException
      */
-    public function validate(array $data = [], $rules = null, array $messages = [], array $customAttributes = [])
+    public function validate(array $data = [], ?array $rules = null, array $messages = [], array $customAttributes = [])
     {
         $validator = $this->validator($data, $rules, $messages, $customAttributes);
         return $this->_validate($validator);
@@ -195,7 +192,6 @@ class BaseRepository
         }
 
         if ($validator->fails()) {
-            return false;
             throw (new ValidationException)->setValidator($validator);
         }
 
